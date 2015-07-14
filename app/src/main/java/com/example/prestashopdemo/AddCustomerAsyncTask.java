@@ -185,6 +185,13 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
     }
 
     String connectionTypeTwo(){
+        final String username  = "YTANJPUUB5SJTD3E6XKYWQDA9CZT";
+        final String password = "";// leave it empty
+        String authToBytes = username + ":" + password;
+
+        byte[] authBytes = org.apache.commons.codec.binary.Base64.encodeBase64(authToBytes.getBytes());
+        String authBytesString =  new String(authBytes);
+
         HttpParams httpParameters = new BasicHttpParams();
         // Set the timeout in milliseconds until a connection is established.
         // The default value is zero, that means the timeout is not used.
@@ -212,8 +219,7 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
 
 
         HttpGet httpGet = new HttpGet("http://YTANJPUUB5SJTD3E6XKYWQDA9CZTEF4U@grood.in/api/customers/");
-        httpGet.setHeader("Authorization","Basic " +
-                Base64.encode(new String("YTANJPUUB5SJTD3E6XKYWQDA9CZTEF4U").getBytes(),Base64.DEFAULT));
+        httpGet.setHeader("Authorization","Basic " +authBytesString);
         try {
             HttpResponse response = httpclient.execute(httpGet);
             String strResponse = EntityUtils.toString(response.getEntity());
