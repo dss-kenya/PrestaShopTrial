@@ -33,6 +33,8 @@ import java.util.Map;
 
 /**
  * Created by user on 14/07/2015.
+ * http://stackoverflow.com/questions/21881678/parse-xml-in-android-from-prestashop-webservice
+ * http://stackoverflow.com/questions/28724731/how-to-integrate-prestashop-with-android#
  */
 public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
     private static final char PARAMETER_DELIMITER = '&';
@@ -46,8 +48,8 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
 
     @Override
     protected Void doInBackground(Void... params) {
-        //connectionTypeOne();
-        connectionTypeTwo();
+        connectionTypeOne();
+        //connectionTypeTwo();
         return null;
     }
 
@@ -132,11 +134,11 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
             String authToBytes = username + ":" + password;
             //....
 
-            //byte[] authBytes = org.apache.commons.codec.binary.Base64.encodeBase64(authToBytes.getBytes());
-            //String authBytesString =  new String(authBytes);
+            byte[] authBytes = org.apache.commons.codec.binary.Base64.encodeBase64(authToBytes.getBytes());
+            String authBytesString =  new String(authBytes);
             //then your code
 
-            //urlConnection.setRequestProperty("ws_key",username);
+            urlConnection.setRequestProperty("Authorization","Basic " + authBytesString);
 
             // set the parameters as per the schema
             // get schema from
