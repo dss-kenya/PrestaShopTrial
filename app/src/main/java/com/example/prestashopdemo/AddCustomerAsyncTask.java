@@ -1,34 +1,17 @@
 package com.example.prestashopdemo;
 
 import android.os.AsyncTask;
-import android.util.Base64;
 import android.util.Log;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.ParseException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -40,6 +23,7 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
     private static final char PARAMETER_DELIMITER = '&';
     private static final char PARAMETER_EQUALS_CHAR = '=';
     private HttpURLConnection urlConnection;
+    private final String TAG = this.getClass().getSimpleName();
 
     @Override
     protected void onPreExecute() {
@@ -48,8 +32,7 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
 
     @Override
     protected Void doInBackground(Void... params) {
-        connectionTypeOne();
-        //connectionTypeTwo();
+        performWebserviceCall();
         return null;
     }
 
@@ -99,28 +82,22 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
                 }
             }
         }
-        return line;
+        return sb.toString();
     }
 
-    private String connectionTypeOne() {
+    private String performWebserviceCall() {
         try {
-            // YTANJPUUB5SJTD3E6XKYWQDA9CZTEF4U@
-
             final String username  = "YTANJPUUB5SJTD3E6XKYWQDA9CZT";
             final String password = "";// leave it empty
 
-            //String urlStr = "http://grood.in/api/customers/?ws_key=YTANJPUUB5SJTD3E6XKYWQDA9CZT";
+            // commenting these urls, might be needed sometime later on
             //String urlStr = "http://grood.in/api/customers?ws_key=YTANJPUUB5SJTD3E6XKYWQDA9CZTEF4U";
+            //String urlStr = "http://YTANJPUUB5SJTD3E6XKYWQDA9CZTEF4U@grood.in/api/customers/";
+            //String urlStr = http://grood.in/api/customers?ws_key=YTANJPUUB5SJTD3E6XKYWQDA9CZTEF4U
+            //String urlStr = "http://grood.in/api/customers/";
 
-            String urlStr = "http://YTANJPUUB5SJTD3E6XKYWQDA9CZTEF4U@grood.in/api/customers/";
-            String postParameters = "";
-
-            /*Authenticator.setDefault(new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(username, password.toCharArray());
-                }
-            });*/
+            String urlStr = "http://grood.in/api/customers?ws_key=YTANJPUUB5SJTD3E6XKYWQDA9CZTEF4U";
+            String postParameters = null;
 
             URL urlToRequest = new URL(urlStr);
             urlConnection = (HttpURLConnection) urlToRequest.openConnection();
@@ -128,21 +105,17 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
             urlConnection.setRequestMethod("GET");
             urlConnection.setRequestProperty("Content-Type",
                     "text/xml;charset=utf-8");
-            //urlConnection.setRequestProperty("Accept", "application/XML");
 
-
-            String authToBytes = username + ":" + password;
-            //....
-
-            byte[] authBytes = org.apache.commons.codec.binary.Base64.encodeBase64(authToBytes.getBytes());
-            String authBytesString =  new String(authBytes);
-            //then your code
-
-            urlConnection.setRequestProperty("Authorization","Basic " + authBytesString);
+            // Authorization commented since it is part of the url now
+            //String authToBytes = username + ":" + password;
+            //byte[] authBytes = org.apache.commons.codec.binary.Base64.encodeBase64(authToBytes.getBytes());
+            //String authBytesString =  new String(authBytes);
+            //urlConnection.setRequestProperty("Authorization","Basic " + authBytesString);
 
             // set the parameters as per the schema
             // get schema from
             // https://grood.in/api/customers/?schema=synopsis
+            // commenting these since it is a get operation not a post
             /*Map<String,String> map = new HashMap<>();
             map.put("passwd","2a3b068284585f4bd212d301af7cc0b7");
             map.put("lastname","xyz");
@@ -158,84 +131,28 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
 
             // handle issues
             int statusCode = urlConnection.getResponseCode();
-            if (statusCode != HttpURLConnection.HTTP_OK) {
-                // throw some exception
-
-                InputStream in =
-                        new BufferedInputStream(urlConnection.getInputStream());
-                Log.e("dhara", getResponseText(in));
-            }
 
             // read output (only for GET)
-            /*if (postParameters != null) {
+            if (postParameters != null) {
                 return null;
             } else {
+                if (statusCode == HttpURLConnection.HTTP_OK) {
                 InputStream in =
                         new BufferedInputStream(urlConnection.getInputStream());
-                Log.e("dhara", getResponseText(in));
-            }*/
+                Log.e(TAG, getResponseText(in));
+                }
+            }
         }catch (ProtocolException e) {
             e.printStackTrace();
         }catch (IOException e) {
             e.printStackTrace();
         }finally {
+            // close the connection
+            // whatever errors might have occurred
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
         }
         return null;
-    }
-
-    String connectionTypeTwo(){
-        final String username  = "YTANJPUUB5SJTD3E6XKYWQDA9CZT";
-        final String password = "";// leave it empty
-        String authToBytes = username + ":" + password;
-
-        byte[] authBytes = org.apache.commons.codec.binary.Base64.encodeBase64(authToBytes.getBytes());
-        String authBytesString =  new String(authBytes);
-
-        HttpParams httpParameters = new BasicHttpParams();
-        // Set the timeout in milliseconds until a connection is established.
-        // The default value is zero, that means the timeout is not used.
-        int timeoutConnection = 30000;
-        HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-        // Set the default socket timeout (SO_TIMEOUT)
-        // in milliseconds which is the timeout for waiting for data.
-        int timeoutSocket = 30000;
-        HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-
-        HttpClient httpclient = new DefaultHttpClient(httpParameters);
-
-        // set the params in the get method
-        int counter = 0;
-        /*if(params != null) {
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                counter ++;
-                if(counter == 1) {
-                    url = url + QUESTION + entry.getKey() + EQUAL + entry.getValue();
-                }else {
-                    url = url + AMPERSAND + entry.getKey() + EQUAL + entry.getValue();
-                }
-            }
-        }*/
-
-
-        HttpGet httpGet = new HttpGet("http://YTANJPUUB5SJTD3E6XKYWQDA9CZTEF4U@grood.in/api/customers/");
-        httpGet.setHeader("Authorization","Basic " +authBytesString);
-        try {
-            HttpResponse response = httpclient.execute(httpGet);
-            String strResponse = EntityUtils.toString(response.getEntity());
-            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                return strResponse;
-            }
-            return strResponse;
-        }catch(ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-
     }
 }
