@@ -5,18 +5,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 
-public class MainActivity extends AppCompatActivity {
-
+public class MainActivity extends AppCompatActivity implements IResponseListener{
+    private TextView mTxtDetails;
+    private IResponseListener mListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mTxtDetails = (TextView)findViewById(R.id.txtDetails);
+        mListener = this;
     }
 
-    public void insertCustomer(View view) {
-        new AddCustomerAsyncTask().execute();
+    public void getList(View view) {
+        new GetCustomerAsyncTask(mListener).execute();
     }
 
     @Override
@@ -39,5 +43,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResponseReceived(Object object) {
+        if(object != null) {
+            if(object instanceof  String) {
+                // we receive the response and set the text
+                // for you to see
+                String response = (String)object;
+                mTxtDetails.setText(response);
+            }
+        }
     }
 }

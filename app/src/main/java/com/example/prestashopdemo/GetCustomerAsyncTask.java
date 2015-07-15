@@ -19,11 +19,16 @@ import java.util.Map;
  * http://stackoverflow.com/questions/21881678/parse-xml-in-android-from-prestashop-webservice
  * http://stackoverflow.com/questions/28724731/how-to-integrate-prestashop-with-android#
  */
-public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
+public class GetCustomerAsyncTask extends AsyncTask<Void,Void,String>{
     private static final char PARAMETER_DELIMITER = '&';
     private static final char PARAMETER_EQUALS_CHAR = '=';
     private HttpURLConnection urlConnection;
     private final String TAG = this.getClass().getSimpleName();
+    private IResponseListener mListener;
+
+    public GetCustomerAsyncTask(IResponseListener listener) {
+        mListener = listener;
+    }
 
     @Override
     protected void onPreExecute() {
@@ -31,60 +36,25 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
     }
 
     @Override
-    protected Void doInBackground(Void... params) {
-        performWebserviceCall();
-        return null;
+    protected String doInBackground(Void... params) {
+        String response = performWebserviceCall();
+        return response;
     }
 
     @Override
-    protected void onPostExecute(Void aVoid) {
-        super.onPostExecute(aVoid);
-    }
-
-    public String createQueryStringForParameters(Map<String, String> parameters) {
-        StringBuilder parametersAsQueryString = new StringBuilder();
-        if (parameters != null) {
-            boolean firstParameter = true;
-
-            for (String parameterName : parameters.keySet()) {
-                if (!firstParameter) {
-                    parametersAsQueryString.append(PARAMETER_DELIMITER);
-                }
-
-                parametersAsQueryString.append(parameterName)
-                        .append(PARAMETER_EQUALS_CHAR)
-                        .append(URLEncoder.encode(
-                                parameters.get(parameterName)));
-
-                firstParameter = false;
-            }
+    protected void onPostExecute(String result) {
+        super.onPostExecute(result);
+        if(mListener != null) {
+            mListener.onResponseReceived(result);
         }
-        return parametersAsQueryString.toString();
     }
 
-    private String getResponseText(InputStream is) {
-        String line = "";
-        BufferedReader br = null;
-        StringBuilder sb = new StringBuilder();
-        try {
-            br = new BufferedReader(new InputStreamReader(is));
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return sb.toString();
-    }
-
+    /**
+     * Makes the webservice call and returns the response if there else null
+     * It is a GET operation at the moment
+     * Can be modified to accomodate a POST also
+     * @return
+     */
     private String performWebserviceCall() {
         try {
             final String username  = "YTANJPUUB5SJTD3E6XKYWQDA9CZT";
@@ -137,9 +107,10 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
                 return null;
             } else {
                 if (statusCode == HttpURLConnection.HTTP_OK) {
-                InputStream in =
-                        new BufferedInputStream(urlConnection.getInputStream());
-                Log.e(TAG, getResponseText(in));
+                    InputStream in =
+                            new BufferedInputStream(urlConnection.getInputStream());
+                    String response = getResponseText(in);
+                    return response;
                 }
             }
         }catch (ProtocolException e) {
@@ -154,5 +125,59 @@ public class AddCustomerAsyncTask extends AsyncTask<Void,Void,Void>{
             }
         }
         return null;
+    }
+
+    /**
+     * Gets the response as a string from InputStream
+     * @param is
+     * @return
+     */
+    private String getResponseText(InputStream is) {
+        String line = "";
+        BufferedReader br = null;
+        StringBuilder sb = new StringBuilder();
+        try {
+            br = new BufferedReader(new InputStreamReader(is));
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Forms the query string if there are parameters to post
+     * @param parameters
+     * @return
+     */
+    public String createQueryStringForParameters(Map<String, String> parameters) {
+        StringBuilder parametersAsQueryString = new StringBuilder();
+        if (parameters != null) {
+            boolean firstParameter = true;
+
+            for (String parameterName : parameters.keySet()) {
+                if (!firstParameter) {
+                    parametersAsQueryString.append(PARAMETER_DELIMITER);
+                }
+
+                parametersAsQueryString.append(parameterName)
+                        .append(PARAMETER_EQUALS_CHAR)
+                        .append(URLEncoder.encode(
+                                parameters.get(parameterName)));
+
+                firstParameter = false;
+            }
+        }
+        return parametersAsQueryString.toString();
     }
 }
