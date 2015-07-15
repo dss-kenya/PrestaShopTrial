@@ -5,21 +5,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
 public class MainActivity extends AppCompatActivity implements IResponseListener{
     private TextView mTxtDetails;
+    private ProgressBar mProgressBar;
     private IResponseListener mListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mTxtDetails = (TextView)findViewById(R.id.txtDetails);
+        mProgressBar = (ProgressBar)findViewById(R.id.progressBar);
+        mProgressBar.setVisibility(View.INVISIBLE);
         mListener = this;
     }
 
     public void getList(View view) {
+        mProgressBar.setVisibility(View.VISIBLE);
         new GetCustomerAsyncTask(mListener).execute();
     }
 
@@ -47,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements IResponseListener
 
     @Override
     public void onResponseReceived(Object object) {
+        mProgressBar.setVisibility(View.INVISIBLE);
         if(object != null) {
             if(object instanceof  String) {
                 // we receive the response and set the text
